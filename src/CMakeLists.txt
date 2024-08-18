@@ -1,3 +1,4 @@
+# 表示本项目中的头文件只会被包含一次
 include_guard(GLOBAL)
 
 include_directories(. third_party third_party/spdlog/include third_party/boost third_party/mbedtls/include)
@@ -27,11 +28,11 @@ set(MODULE_NAME "Buried")
 
 message(STATUS "libs ${LIBS}")
 
+# 编译动态库与静态库
 if(BUILD_BURIED_STATIC_LIBS)
     add_library(${MODULE_NAME}_static STATIC ${BURIED_SRCS})
     target_link_libraries(${MODULE_NAME}_static PRIVATE ${LIBS} spdlog mbedtls_static)
 endif()
-
 if(BUILD_BURIED_SHARED_LIBS)
     add_library(${MODULE_NAME}_shared SHARED ${BURIED_SRCS})
     target_link_libraries(${MODULE_NAME}_shared PRIVATE ${LIBS} spdlog mbedtls_static)
