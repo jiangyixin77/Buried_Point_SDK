@@ -54,3 +54,6 @@
 - ![image](https://github.com/user-attachments/assets/b507620b-0a4f-4243-96ee-e01827fbd9f3)
 - 图中Formatter为日志进行格式化，拼接进程ID、线程ID、时间、文件名等信息
 - 图中Sinks控制日志写入的目的地，如console sink写入控制台，file sink写入文件
+- 在src/buried_core.cc中定义日志
+- ```注意：由于我们使用了spdlog的自定义Formatter，所以需要定义以下宏，避免Custom Formatting异常：add_definitions(-DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)```
+- 在tests/test.cc中写一个对应的单元测试
