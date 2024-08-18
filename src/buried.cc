@@ -6,6 +6,7 @@
 
 extern "C" {
 
+//对应new操作
 Buried* Buried_Create(const char* work_dir) {
   if (!work_dir) {
     return nullptr;
@@ -13,12 +14,14 @@ Buried* Buried_Create(const char* work_dir) {
   return new Buried(work_dir);
 }
 
+//对应delete操作
 void Buried_Destroy(Buried* buried) {
   if (buried) {
     delete buried;
   }
 }
 
+// buried参数在内部会自动从C指针转化为C++指针
 int32_t Buried_Start(Buried* buried, BuriedConfig* config) {
   if (!buried || !config) {
     return BuriedResult::kBuriedInvalidParam;
