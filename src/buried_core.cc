@@ -21,17 +21,23 @@ void Buried::InitWorkPath_(const std::string& work_dir) {
 }
 
 void Buried::InitLogger_() {
+  // 构造console_sink
   auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
 
   std::filesystem::path _log_dir = work_path_ / "buried.log";
+
+  // 构造file_sink
   auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
       _log_dir.string(), true);
 
+  //把两个sink作为参数传入到spdlog::logger的构造函数中
   logger_ = std::shared_ptr<spdlog::logger>(
       new spdlog::logger("buried_sink", {console_sink, file_sink}));
 
-  // ref: https://github.com/gabime/spdlog/wiki/3.-Custom-formatting
+  // 自定义Formatter
   logger_->set_pattern("[%c] [%s:%#] [%l] %v");
+
+  //设置某个logger对象的日志级别，低于此级别的日志会被忽略
   logger_->set_level(spdlog::level::trace);
 }
 
