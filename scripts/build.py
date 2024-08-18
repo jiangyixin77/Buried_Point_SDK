@@ -5,6 +5,8 @@ import sys
 import argparse
 
 SCRIPT_PATH = os.path.split(os.path.realpath(__file__))[0]
+
+# 定义构建目录
 BUILD_DIR_PATH = SCRIPT_PATH + '/../build'
 
 
@@ -19,12 +21,15 @@ def build_windows(platform='x64', config='Release', args=None):
 
     os.chdir(platform_dir)
 
+    # 生成makefile文件
     build_cmd = 'cmake ../.. -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=%s -DCMAKE_GENERATOR_PLATFORM=%s -T v143' % (
         config, platform)
 
+    # 如果--test，打开相应开关
     if args.test:
         build_cmd += ' -DBUILD_BURIED_TEST=ON'
 
+    # 如果--example，打开相应开关
     if args.example:
         build_cmd += ' -DBUILD_BURIED_EXAMPLES=ON'
 
@@ -34,6 +39,7 @@ def build_windows(platform='x64', config='Release', args=None):
         print('!!!!!!!!!!!!!!!!!!build fail')
         return False
 
+    # 构建
     build_cmd = 'cmake --build . --config %s --parallel 8' % (config)
     ret = os.system(build_cmd)
     if ret != 0:
@@ -58,3 +64,7 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+# 脚本核心：
+# 1.生成makefile文件 build_cmd = 'cmake ../.. -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=%s -DCMAKE_GENERATOR_PLATFORM=%s -T v143' % (config, platform)
+# 2.构建 build_cmd = 'cmake --build . --config %s --parallel 8' % (config)
