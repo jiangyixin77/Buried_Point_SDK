@@ -5,6 +5,7 @@
 using namespace sqlite_orm;
 namespace buried {
 
+//创建一个数据库存储对象
 inline auto InitStorage(const std::string& path) {
   return make_storage(
       path, make_table("buried_data",
@@ -13,11 +14,15 @@ inline auto InitStorage(const std::string& path) {
                        make_column("priority", &BuriedDb::Data::priority),
                        make_column("timestamp", &BuriedDb::Data::timestamp),
                        make_column("content", &BuriedDb::Data::content)));
+  //建立了一个表，含有id，priority等字段
 }
 
 class BuriedDbImpl {
  public:
+  //定义DBStorage类型，通过调用InitStorage函数返回类型推断得到
   using DBStorage = decltype(InitStorage(""));
+
+//用inline auto + decltype关键字推断整个storage的类型
 
  public:
   BuriedDbImpl(std::string db_path) : db_path_(db_path) {
@@ -27,10 +32,12 @@ class BuriedDbImpl {
 
   ~BuriedDbImpl() {}
 
+  //增删查操作都是使用的storage相关方法
+  //这里使用了RAII概念，若中间有步骤失败，return后会在guard析构函数中触发回滚操作
   void InsertData(const BuriedDb::Data& data) {
-    auto guard = storage_->transaction_guard();
-    storage_->insert(data);
-    guard.commit();
+    auto guard = storage_->transaction_guard();//开启事务并创建guard对象
+    storage_->insert(data);//插入数据
+    guard.commit();//提交事务
   }
 
   void DeleteData(const BuriedDb::Data& data) {
@@ -58,9 +65,11 @@ class BuriedDbImpl {
  private:
   std::string db_path_;
 
+  //DBStorage类型的指针，用于操作数据库存储对象
   std::unique_ptr<DBStorage> storage_;
 };
 
+//BuriedDB所有成员函数的实现，都是调用的impl对应方法，实际定义都在BuriedDbImpl中
 BuriedDb::BuriedDb(std::string db_path)
     : impl_{std::make_unique<BuriedDbImpl>(std::move(db_path))} {}
 
