@@ -47,4 +47,10 @@
 - 使用C接口而不是C++接口，因为C接口语言交互性最高，ABI兼容性最高
 - 在include/buried.h中贴出对外接口
 - 在src/buried_core.h中具体定义Buried
-- 在src/buried.cc中做一个桥接层做转换
+- 在src/buried.cc中做一个桥接层，做C到C++的转换
+
+# 日志功能设计
+- 为了使不同实例产生的日志放入不同的工作目录互相隔离，引入了多个logger对象，如图所示
+- ![image](https://github.com/user-attachments/assets/b507620b-0a4f-4243-96ee-e01827fbd9f3)
+- 图中Formatter为日志进行格式化，拼接进程ID、线程ID、时间、文件名等信息
+- 图中Sinks控制日志写入的目的地，如console sink写入控制台，file sink写入文件
