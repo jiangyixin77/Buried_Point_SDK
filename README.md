@@ -112,6 +112,12 @@
 - 通过定时器来保证消息每隔一段时间自动上报
 - 存取数据时要加密解密
 - 通过strand调度避免数据竞争
+- 相关代码：
+- src/report/buried_report.h
+- src/report/buried_report.cc
 
 # 整体功能组装
+- core模块，将各个子模块串联起来，使其协同工作，实现完整的埋点上报功能
+- 相关代码：
 - src/buried_core.cc
+- src/buried_core.h
