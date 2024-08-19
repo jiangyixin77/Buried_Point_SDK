@@ -36,11 +36,18 @@
 - ![image](https://github.com/user-attachments/assets/f3b0ec2f-3801-4a42-b629-91ebdade1603)
 
 # 代码结构设计
-- include头文件
-- src核心代码
-- examples示例
-- tests测试
-- scripts脚本
+- include头文件，放置声明函数
+- src核心代码，放置定义函数
+- examples示例，放置示例代码
+- tests测试，放置测试代码
+- scripts脚本，放置编译脚本
+
+# 程序编译
+- 使用cmake构建来编译动态库静态库
+- 脚本写好后编译程序：```python scripts\build.py --test --example```
+- 生成了buried_test.exe和buried_example.exe两个可执行文件
+- 执行可执行文件
+- ![image](https://github.com/user-attachments/assets/8fac0e5c-5eb4-407a-a865-0fea693a09c7)
 
 # 对外接口设计
 - SDK产物一般是库文件+头文件，其中头文件含对外接口
