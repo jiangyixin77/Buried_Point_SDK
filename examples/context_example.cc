@@ -4,6 +4,8 @@
 
 #include "src/context/context.h"
 
+// 这里有两个strand，mainStrand和reportStrand，两个strand任务并行执行，但又会保证同一个strand中的任务顺序执行
+// mainStrand处理主要逻辑，reportStrand执行网络相关任务
 int main() {
   buried::Context::GetGlobalContext().Start();
 
