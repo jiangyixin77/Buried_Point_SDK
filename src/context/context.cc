@@ -2,6 +2,7 @@
 
 namespace buried {
 
+// 因为我们需要两个strand并行执行，所以这里创建了两个线程，分别调度strand 
 void Context::Start() {
   if (is_start_.load()) {
     return;
