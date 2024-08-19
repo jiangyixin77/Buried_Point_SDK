@@ -81,6 +81,13 @@
 - 在src/database/database.h以及src/database/database.cc中进行数据库设计
 
 # 发起HTTP请求
+- **HTTP请求是基于TCP协议的，它涉及以下步骤：**
+- 1.解析域名获取IP地址与端口号
+- 2.建立TCP连接并获取套接字通道
+- 3.向通道写入HTTP信息，向服务器发数据
+- 4.从通道接收返回数据
+- 5.关闭TCP连接
+- **在该项目的具体实现**
 - 使用Beast作为HTTP请求的库
 - 在tests/test_http.cc中使用Beast发起HTTP请求
 - 为了避免每次发起网络请求都写大量代码，我们在src/report/http_report.h以及src/report/http_report.cc中，基于需求封装一套好用的HTTP接口并实现
