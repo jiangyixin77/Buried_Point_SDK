@@ -57,56 +57,60 @@ class AESImpl {
   unsigned char iv_[16] = {0};
 };
 
+// 初始化加密算法模块
 void AESImpl::Init(const char* key, size_t key_size) {
-  mbedtls_cipher_init(&encrypt_ctx_);
+  mbedtls_cipher_init(&encrypt_ctx_);// 初始化加密函数
   mbedtls_cipher_setup(
-      &encrypt_ctx_, mbedtls_cipher_info_from_type(MBEDTLS_CIPHER_AES_256_CBC));
-  mbedtls_cipher_set_padding_mode(&encrypt_ctx_, MBEDTLS_PADDING_PKCS7);
+      &encrypt_ctx_, mbedtls_cipher_info_from_type(MBEDTLS_CIPHER_AES_256_CBC));//配置加密函数
+  mbedtls_cipher_set_padding_mode(&encrypt_ctx_, MBEDTLS_PADDING_PKCS7);//设置加密函数填充模式
   mbedtls_cipher_setkey(&encrypt_ctx_,
                         reinterpret_cast<const unsigned char*>(key),
-                        key_size * 8, MBEDTLS_ENCRYPT);
+                        key_size * 8, MBEDTLS_ENCRYPT);//设置加密函数密钥
 
-  encrypt_block_size_ = mbedtls_cipher_get_block_size(&encrypt_ctx_);
+  encrypt_block_size_ = mbedtls_cipher_get_block_size(&encrypt_ctx_);//获取加密块大小
 
-  mbedtls_cipher_init(&decrypt_ctx_);
+  mbedtls_cipher_init(&decrypt_ctx_);// 初始化解密函数
   mbedtls_cipher_setup(
-      &decrypt_ctx_, mbedtls_cipher_info_from_type(MBEDTLS_CIPHER_AES_256_CBC));
-  mbedtls_cipher_set_padding_mode(&decrypt_ctx_, MBEDTLS_PADDING_PKCS7);
+      &decrypt_ctx_, mbedtls_cipher_info_from_type(MBEDTLS_CIPHER_AES_256_CBC));//配置解密函数
+  mbedtls_cipher_set_padding_mode(&decrypt_ctx_, MBEDTLS_PADDING_PKCS7);//设置解密函数填充模式
   mbedtls_cipher_setkey(&decrypt_ctx_,
                         reinterpret_cast<const unsigned char*>(key),
-                        key_size * 8, MBEDTLS_DECRYPT);
+                        key_size * 8, MBEDTLS_DECRYPT);//设置解密函数密钥
 
-  decrypt_block_size_ = mbedtls_cipher_get_block_size(&decrypt_ctx_);
+  decrypt_block_size_ = mbedtls_cipher_get_block_size(&decrypt_ctx_);//获取解密块大小
 }
 
+// 释放加密解密算法模块资源
 void AESImpl::UnInit() {
   mbedtls_cipher_free(&encrypt_ctx_);
   mbedtls_cipher_free(&decrypt_ctx_);
 }
 
+// 对输入数据加密
 std::string AESImpl::Encrypt(const void* input, size_t input_size) {
-  mbedtls_cipher_set_iv(&encrypt_ctx_, iv_, sizeof(iv_));
-  mbedtls_cipher_reset(&encrypt_ctx_);
+  mbedtls_cipher_set_iv(&encrypt_ctx_, iv_, sizeof(iv_));//设初始化向量
+  mbedtls_cipher_reset(&encrypt_ctx_);//重置状态
 
-  std::string output(input_size + encrypt_block_size_, 0);
+  std::string output(input_size + encrypt_block_size_, 0);//创建输出字符串
   size_t olen = 0;
   int ret = mbedtls_cipher_update(
       &encrypt_ctx_, reinterpret_cast<const unsigned char*>(input), input_size,
-      reinterpret_cast<unsigned char*>(output.data()), &olen);
+      reinterpret_cast<unsigned char*>(output.data()), &olen);//加密
   if (ret != 0) {
     return "";
   }
   size_t olen2 = 0;
   ret = mbedtls_cipher_finish(
       &encrypt_ctx_, reinterpret_cast<unsigned char*>(output.data()) + olen,
-      &olen2);
+      &olen2);//完成加密操作
   if (ret != 0) {
     return "";
   }
-  output.resize(olen + olen2);
+  output.resize(olen + olen2);//调整输出结果的字符串的大小
   return output;
 }
 
+// 对输入数据解密，和上面加密的同理
 std::string AESImpl::Decrypt(const void* input, size_t input_size) {
   mbedtls_cipher_set_iv(&decrypt_ctx_, iv_, sizeof(iv_));
   mbedtls_cipher_reset(&decrypt_ctx_);
