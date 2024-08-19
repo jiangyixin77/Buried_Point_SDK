@@ -50,10 +50,13 @@ Buried::Buried(const std::string& work_dir) {
 
   SPDLOG_LOGGER_INFO(Logger(), "Buried init success");
 }
+// 启动context模块，设置工作目录和logger对象
 
 Buried::~Buried() {}
 
 BuriedResult Buried::Start(const Config& config) {
+
+  // 把config各项配置赋给common_service的对应成员变量
   buried::CommonService common_service;
   common_service.host = config.host;
   common_service.port = config.port;
@@ -63,6 +66,7 @@ BuriedResult Buried::Start(const Config& config) {
   common_service.app_name = config.app_name;
   common_service.custom_data = nlohmann::json::parse(config.custom_data);
 
+  // 创建新的BuriedReport对象，然后调用start方法，开启埋点上报
   buried_report_ = std::make_unique<buried::BuriedReport>(
       logger_, std::move(common_service), work_path_.string());
   buried_report_->Start();
@@ -71,10 +75,14 @@ BuriedResult Buried::Start(const Config& config) {
 
 BuriedResult Buried::Report(std::string title, std::string data,
                             uint32_t priority) {
+
+  // 创建新的BuriedData对象，把title和data赋给BuriedData对应成员变量
   buried::BuriedData buried_data;
   buried_data.title = std::move(title);
   buried_data.data = std::move(data);
   buried_data.priority = priority;
+
+  // 把BuriedData对象传递给BuriedReport对象，实现数据上报
   buried_report_->InsertData(buried_data);
   return BuriedResult::kBuriedOk;
 }
