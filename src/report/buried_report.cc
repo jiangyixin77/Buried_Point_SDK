@@ -17,6 +17,7 @@ namespace buried {
 static const char kDbName[] = "buried.db";
 
 class BuriedReportImpl {
+ // 整个Report相关方法，都是通过ReportStrand调度的，既在子线程调用，又确保了所有方法都在一个线程实现
  public:
   BuriedReportImpl(std::shared_ptr<spdlog::logger> logger,
                    CommonService common_service, std::string work_path)
@@ -30,6 +31,7 @@ class BuriedReportImpl {
     crypt_ = std::make_unique<AESCrypt>(key);
     SPDLOG_LOGGER_INFO(logger_, "BuriedReportImpl init success");
     Context::GetGlobalContext().GetReportStrand().post([this]() { Init_(); });
+    // 构造或赋值了logger和crypt对象后，通过ReportStrand调度Init方法
   }
 
   ~BuriedReportImpl() = default;
@@ -52,15 +54,13 @@ class BuriedReportImpl {
   bool ReportData_(const std::string& data);
 
  private:
-  std::shared_ptr<spdlog::logger> logger_;
-  std::string work_dir_;
-  std::unique_ptr<BuriedDb> db_;
-  CommonService common_service_;
-  std::unique_ptr<buried::Crypt> crypt_;
-
-  std::unique_ptr<boost::asio::deadline_timer> timer_;
-
-  std::vector<BuriedDb::Data> data_caches_;
+  std::shared_ptr<spdlog::logger> logger_;//打印日志的实例
+  std::string work_dir_;//工作目录
+  std::unique_ptr<BuriedDb> db_;//数据库实例
+  CommonService common_service_;//公共数据获取
+  std::unique_ptr<buried::Crypt> crypt_;//加密解密
+  std::unique_ptr<boost::asio::deadline_timer> timer_;//定时器
+  std::vector<BuriedDb::Data> data_caches_;//上报数据装载
 };
 
 void BuriedReportImpl::Init_() {
@@ -69,7 +69,7 @@ void BuriedReportImpl::Init_() {
                      db_path.string());
   db_path /= kDbName;
   db_ = std::make_unique<BuriedDb>(db_path.string());
-}
+}// 传入数据库路径，构建数据库对象
 
 void BuriedReportImpl::Start() {
   SPDLOG_LOGGER_INFO(logger_, "BuriedReportImpl start");
@@ -86,12 +86,12 @@ void BuriedReportImpl::Start() {
         }
         ReportCache_();
       }));
-}
+}// 创建定时器，每5秒调用一次ReportCache_
 
 void BuriedReportImpl::InsertData(const BuriedData& data) {
   Context::GetGlobalContext().GetReportStrand().post(
       [this, data]() { db_->InsertData(MakeDbData_(data)); });
-}
+}// 向上报模块插入数据
 
 bool BuriedReportImpl::ReportData_(const std::string& data) {
   HttpReporter reporter(logger_);
@@ -117,7 +117,7 @@ void BuriedReportImpl::ReportCache_() {
   }
 
   NextCycle_();
-}
+}// 按优先级取10条数据，再构造网络上报的body，再去上报数据；成功后删除相应数据，然后启动下一次定时任务
 
 std::string BuriedReportImpl::GenReportData_(
     const std::vector<BuriedDb::Data>& datas) {
@@ -131,7 +131,7 @@ std::string BuriedReportImpl::GenReportData_(
   }
   std::string ret = json_datas.dump();
   return ret;
-}
+}// 构造网络上报的body，解密，构造成json array，最后序列化为string
 
 BuriedDb::Data BuriedReportImpl::MakeDbData_(const BuriedData& data) {
   BuriedDb::Data db_data;
@@ -162,7 +162,7 @@ BuriedDb::Data BuriedReportImpl::MakeDbData_(const BuriedData& data) {
                      db_data.content.size());
 
   return db_data;
-}
+} //把数据存入数据库中
 
 void BuriedReportImpl::NextCycle_() {
   SPDLOG_LOGGER_INFO(logger_, "BuriedReportImpl next cycle");
@@ -175,7 +175,7 @@ void BuriedReportImpl::NextCycle_() {
     Context::GetGlobalContext().GetReportStrand().post(
         [this]() { ReportCache_(); });
   });
-}
+} //用定时器，启动下一次循环任务
 
 // ========
 
