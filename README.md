@@ -53,7 +53,7 @@
 - SDK产物一般是库文件+头文件，其中头文件含对外接口
 - 用户使用SDK的功能，其实也是调用这些头文件对外接口，接口越少越好
 - 使用C接口而不是C++接口，因为C接口语言交互性最高，ABI兼容性最高
-- 在include/buried.h中贴出对外接口
+- 在[include/buried.h](include/buried.h)中贴出对外接口
 - 在src/buried_core.h中具体定义Buried
 - 在src/buried.cc中做一个桥接层，做C到C++的转换
 
@@ -116,8 +116,22 @@
 - src/report/buried_report.h
 - src/report/buried_report.cc
 
+# 公共信息获取
+- 获取用户id，系统版本号，设备id，设备名称，时间戳等信息
+- 相关代码：
+- src/common/common_service.cc
+
 # 整体功能组装
 - core模块，将各个子模块串联起来，使其协同工作，实现完整的埋点上报功能
 - 相关代码：
 - src/buried_core.cc
 - src/buried_core.h
+
+# 进行整体测试
+- 对build.py代码进行编译
+- 生成两个可执行文件：bin/buried_example.exe  和  bin/server.exe
+- 打开两个终端，分别运行这两个可执行文件，运行结果如下图所示：
+- ![image](https://github.com/user-attachments/assets/07911c16-ad83-4ba7-96b9-fddd3a7c83d4)
+- 左侧执行bin/server.exe的终端显示了埋点所接收到的公共信息
+- 右侧执行bin/buried_example.exe的终端显示了埋点上报的记录
+- 出现以上画面，证明SDK埋点功能组装成功
