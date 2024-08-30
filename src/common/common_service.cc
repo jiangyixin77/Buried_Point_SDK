@@ -1,3 +1,4 @@
+//本代码用以获取公共信息，包括版本号、设备名称及序号、时间戳，等等。
 #include "common/common_service.h"
 
 #include <windows.h>
@@ -12,7 +13,7 @@
 namespace buried {
 
 CommonService::CommonService() { Init(); }
-
+//把设备id号存到注册表内，保证重启设备后，获取到的设备id号一致
 static void WriteRegister(const std::string& key, const std::string& value) {
   HKEY h_key;
   LONG ret = ::RegCreateKeyExA(HKEY_CURRENT_USER, "Software\\Buried", 0, NULL,
@@ -29,7 +30,7 @@ static void WriteRegister(const std::string& key, const std::string& value) {
   }
   ::RegCloseKey(h_key);
 }
-
+//读取注册表，获取之前存储的设备id号
 static std::string ReadRegister(const std::string& key) {
   HKEY h_key;
   LONG ret = ::RegOpenKeyExA(HKEY_CURRENT_USER, "Software\\Buried", 0,
@@ -47,7 +48,7 @@ static std::string ReadRegister(const std::string& key) {
   ::RegCloseKey(h_key);
   return buf;
 }
-
+//获取设备id号，生成随机数作为设备id，然后存到设备注册表内
 static std::string GetDeviceId() {
   static constexpr auto kDeviceIdKey = "device_id";
   static std::string device_id = ReadRegister(kDeviceIdKey);
@@ -57,12 +58,12 @@ static std::string GetDeviceId() {
   }
   return device_id;
 }
-
+//获取进程id
 static std::string GetLifeCycleId() {
   static std::string life_cycle_id = CommonService::GetRandomId();
   return life_cycle_id;
 }
-
+//获取Windows系统版本
 static std::string GetSystemVersion() {
   OSVERSIONINFOEXA os_version_info;
   ZeroMemory(&os_version_info, sizeof(OSVERSIONINFOEXA));
@@ -74,7 +75,7 @@ static std::string GetSystemVersion() {
       std::to_string(os_version_info.dwBuildNumber);
   return system_version;
 }
-
+//获取设备名称
 static std::string GetDeviceName() {
   char buf[1024] = {0};
   DWORD buf_size = sizeof(buf);
@@ -82,7 +83,7 @@ static std::string GetDeviceName() {
   std::string device_name = buf;
   return device_name;
 }
-
+//获取进程时间，需从FILETIME转为SYSTEMTIME
 std::string CommonService::GetProcessTime() {
   DWORD pid = ::GetCurrentProcessId();
   HANDLE h_process =
@@ -114,13 +115,13 @@ std::string CommonService::GetProcessTime() {
             create_sys_time.wMilliseconds);
   return buf;
 }
-
+//获取日期
 std::string CommonService::GetNowDate() {
   auto t =
       std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
   return std::ctime(&t);
 }
-
+//获取随机数
 std::string CommonService::GetRandomId() {
   static constexpr size_t len = 32;
   static constexpr auto chars =
@@ -135,12 +136,12 @@ std::string CommonService::GetRandomId() {
                   [&]() { return chars[dist(rng)]; });
   return result;
 }
-
+//获取公共信息，包括版本号、设备名称及序号、时间戳，等等。
 void CommonService::Init() {
   system_version = GetSystemVersion();
   device_name = GetDeviceName();
   device_id = GetDeviceId();
-  buried_version = PROJECT_VER;
+  buried_version = PROJECT_VER;//从头文件"buried_config.h"中获取
   lifecycle_id = GetLifeCycleId();
 }
 
